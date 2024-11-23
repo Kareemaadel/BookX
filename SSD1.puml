@@ -1,0 +1,42 @@
+@startuml
+
+actor User
+actor AuthenticationSystem as AuthSystem
+entity "BookX" as System
+
+== Main Scenario: Login ==
+
+User -> System: navigateToLoginPage()
+System -> User: showLoginForm()
+
+User -> System: submitCredentials(email, password)
+System -> AuthSystem: validateCredentials(email, password)
+
+alt credentialsValid, You have 2 more attempts
+    AuthSystem --> System: credentialsValid()
+    System -> User: redirectToHomePage()
+else credentialsInvalid
+    AuthSystem --> System: credentialsInvalid()
+    System -> User: showErrorMessage()
+
+    opt Attempts remaining > 0
+        User -> System: submitCredentials(email, password)
+        System -> AuthSystem: validateCredentials(email, password)
+    end
+
+    opt Attempts exhausted
+        System -> User: lockAccount()
+        System -> User: showForgotPasswordButton()
+        User -> System: enterEmail(email)
+        System -> AuthSystem: sendPasswordResetLink(email)
+        AuthSystem --> System: sendResetLinkToEmail()
+        System -> User: sendResetLinkToEmail()
+
+        User -> System: submitNewPassword(newPassword)
+        System -> AuthSystem: updatePassword(email, newPassword)
+        AuthSystem --> System: returnNewPassword()
+        System -> User: redirectToHomePage()
+    end
+end
+
+@enduml
