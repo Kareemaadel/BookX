@@ -1,0 +1,270 @@
+@startuml
+
+' --- Admin Class ---
+class Admin {
+    - id : String
+    - name : String
+    - email : String
+    + manageReport() : void
+    + deleteBook() : void
+    + moderateExchange() : void
+    + deleteReport() : void
+    + resolveFeedback(feedback: Feedback) : void
+    + getInstance() : Admin ' Singleton instance method
+}
+
+' Detailed Preconditions and Postconditions for Admin methods
+note right of Admin::manageReport
+<<precondition>>
+report.status is "pending"
+<<postcondition>>
+report.status is updated to "resolved"
+end note
+
+note right of Admin::deleteBook
+<<precondition>>
+user exists in the system
+and user is not an admin
+<<postcondition>>
+user is removed from the system
+end note
+
+note right of Admin::deleteBook
+<<precondition>>
+book exists in the system
+<<postcondition>>
+book is removed from the system
+end note
+
+note right of Admin::resolveFeedback
+<<precondition>>
+feedback.status is "pending"
+<<postcondition>>
+feedback.status is updated to "resolved"
+end note
+
+' --- DatabaseManager Class ---
+class DatabaseManager {
+    - instance : DatabaseManager
+    + connect() : void ' Singleton method for database connection
+    + getInstance() : DatabaseManager ' Singleton instance method
+}
+
+' --- UserManager Class ---
+class UserManager {
+    - instance : UserManager
+    + getInstance() : UserManager ' Singleton method
+    + register(name: String, email: String, password: String, contactNumber: String, address: String) : User
+    + login(email: String, password: String) : User
+}
+
+class Search {
+    - BookName: String
+    + Searchresult(BookName) : void
+
+}
+
+' Detailed Preconditions and Postconditions for UserManager methods
+note right of UserManager::register
+<<precondition>>
+name, email, password, and contactNumber are not empty
+and password is at least 8 characters long
+and contactNumber has at least 10 digits
+<<postcondition>>
+a new user is created and added to the system
+end note
+
+note right of UserManager::login
+<<precondition>>
+email is not empty
+and password is not empty and at least 8 characters long
+<<postcondition>>
+user session is initiated
+end note
+
+' --- User Class ---
+class User {
+    - id : String
+    - name : String
+    - email : String
+    - password : String
+    - contactNumber : String
+    - address : String
+    + createBook(title: String, author: String, genre: String, condition: String) : Book ' Creator for Book
+    + createExchange(bookOffered: Book, bookRequested: Book) : Exchange ' Creator for Exchange
+    + provideFeedback(exchange: Exchange, rating: int, comment: String) : Feedback ' Creator for Feedback
+    + reportIssue(book: Book, reason: String) : Report ' Creator for Report
+    + browseBooks() : void
+    + viewExchangeHistory() : void
+}
+
+' Detailed Preconditions and Postconditions for User methods
+note right of User::createBook
+<<precondition>>
+title, author, genre, and condition are not empty
+<<postcondition>>
+a new book is created and added to the user's listing
+end note
+
+note right of User::createExchange
+<<precondition>>
+bookRequested.status is "available"
+and bookOffered.status is "available"
+and bookRequested.owner is not the user
+<<postcondition>>
+a new exchange is initiated in "pending" status
+end note
+
+note right of User::provideFeedback
+<<precondition>>
+exchange.status is "completed"
+and rating is between 1 and 5
+<<postcondition>>
+feedback is created with the provided rating and comment
+end note
+
+note right of User::reportIssue
+<<precondition>>
+reason is not empty
+<<postcondition>>
+a new report is created and submitted for the specified book
+end note
+
+' --- Book Class ---
+class Book {
+    - id : String
+    - title : String
+    - author : String
+    - genre : String
+    - condition : String
+    - status : String  ' e.g., "available", "exchanged"
+    + listBook() : void
+    + updateStatus(newStatus: String) : void
+    + viewDetails() : void
+    + manageStatus() : void ' Information Expert: Handles its own status
+}
+
+' Detailed Preconditions and Postconditions for Book methods
+note right of Book::updateStatus
+<<precondition>>
+newStatus is either "available" or "exchanged"
+<<postcondition>>
+status is updated to the new value
+end note
+
+note right of Book::viewDetails
+<<postcondition>>
+returns a string with all book details, including title, author, genre, condition, and status
+end note
+
+' --- Exchange Class ---
+class Exchange {
+    - id : String
+    - bookOffered : Book
+    - bookRequested : Book
+    - status : String  ' e.g., "pending", "completed", "cancelled"
+    - participants : List<User>
+    + initiateExchange() : void
+    + acceptExchange() : void
+    + cancelExchange() : void
+    + completeExchange() : void
+    + manageStatus() : void ' Information Expert: Handles its own status
+}
+
+' Detailed Preconditions and Postconditions for Exchange methods
+note right of Exchange::acceptExchange
+<<precondition>>
+status is "pending"
+<<postcondition>>
+status is updated to "accepted"
+end note
+
+note right of Exchange::cancelExchange
+<<precondition>>
+status is either "pending" or "accepted"
+<<postcondition>>
+status is updated to "cancelled"
+end note
+
+note right of Exchange::completeExchange
+<<precondition>>
+status is "accepted"
+<<postcondition>>
+status is updated to "completed"
+end note
+
+' --- Feedback Class ---
+class Feedback {
+    - id : String
+    - rating : int
+    - comment : String
+    - status : String ' e.g., "pending", "resolved"
+    + provideFeedback() : void
+    + updateFeedback() : void
+    + resolveFeedback() : void
+}
+
+' Detailed Preconditions and Postconditions for Feedback methods
+note right of Feedback::updateFeedback
+<<precondition>>
+rating is between 1 and 5
+and feedback exists in the system
+<<postcondition>>
+feedback is updated with the new rating and comment
+end note
+
+note right of Feedback::resolveFeedback
+<<precondition>>
+feedback.status is "pending"
+<<postcondition>>
+feedback.status is updated to "resolved"
+end note
+
+' --- Report Class ---
+class Report {
+    - id : String
+    - book : Book
+    - reason : String
+    - details : String
+    - status : String  ' e.g., "pending", "resolved"
+    + submitReport() : void
+    + resolveReport() : void
+}
+
+' Detailed Preconditions and Postconditions for Report methods
+note right of Report::resolveReport
+<<precondition>>
+status is "pending"
+<<postcondition>>
+status is updated to "resolved"
+end note
+' --- Relationships and Design Patterns ---
+
+' Singleton Relationships
+UserManager "1" --> "*" User : Manages
+Admin "1" --> "*" Report : Handles
+Admin "1" --> "*" Book : Deletes
+Admin "1" --> "*" Feedback : Resolves
+
+' Creator Relationships
+User "1" --> "*" Book : Creates
+User "1" --> "*" Exchange : Creates
+User "1" --> "*" Feedback : Creates
+User "1" --> "*" Report : Creates
+
+' Information Expert Relationships
+Book "1" --> "*" Exchange : Status Managed By Book
+Exchange "1" --> "1..*" Book : Status Managed By Exchange
+Exchange "1" --> "*" Feedback : Rates
+
+' Aggregation Relationships
+Search "0.." --> "*" Book : Filters
+
+' Association Relationships
+User "1" --> "*" Exchange : Participates In
+
+
+Exchange "1" --> "2" User : Participants
+@enduml
+
+

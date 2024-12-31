@@ -1,0 +1,79 @@
+@startuml
+[*] --> AdminModeration : Admin logs in
+
+state AdminModeration {
+    [*] --> Dashboard : Admin accesses the dashboard
+
+    state Dashboard {
+        [*] --> ReviewingReports : Admin selects "Review Reports"
+        ReviewingReports --> ReportDetails : Admin views a specific report
+
+        ReportDetails --> TakingAction : Admin selects an action
+
+        state TakingAction {
+            [*] --> DeletingUser : Admin selects "Delete User"
+            note left
+            <<OCL>>
+            context User
+            pre: User.allInstances()->includes(user)
+            post: User.allInstances()->excludes(user)
+            inv: user.isAdmin = false
+            end note
+
+            DeletingUser --> Confirmation : User successfully deleted
+            DeletingUser --> Error : Unable to delete user
+            Error --> TakingAction : Retry or cancel action
+
+            [*] --> DeletingBook : Admin selects "Delete Book"
+            note left
+            <<OCL>>
+            context Book
+            pre: Book.allInstances()->includes(book)
+            post: Book.allInstances()->excludes(book)
+            end note
+
+            DeletingBook --> Confirmation : Book successfully deleted
+            DeletingBook --> Error : Unable to delete book
+            Error --> TakingAction : Retry or cancel action
+
+            [*] --> ModeratingExchange : Admin selects "Moderate Exchange"
+
+            state ModeratingExchange {
+                [*] --> ValidatingExchangeStatus : Exchange status is pending
+                note left
+                <<OCL>>
+                context Exchange
+                pre: exchange.status = 'pending'
+                post: exchange.status = 'accepted' or exchange.status = 'rejected'
+                end note
+
+                ValidatingExchangeStatus --> UpdatedStatus : Status successfully updated
+                note left
+                <<OCL>>
+                inv: exchange.status in ['accepted', 'rejected']
+                end note
+
+                UpdatedStatus --> Confirmation : Exchange status updated
+
+                ValidatingExchangeStatus --> Error : Invalid exchange state
+                note left
+                <<OCL>>
+                context Exchange
+                inv: exchange.status <> 'pending'
+                end note
+
+                Error --> ValidatingExchangeStatus : Retry status validation
+            }
+
+            ModeratingExchange --> TakingAction : Return to actions menu
+        }
+
+        TakingAction --> ReviewingReports : Return to reports list
+        ReviewingReports --> Dashboard : Admin exits reviewing
+    }
+
+    Dashboard --> AdminLogsOut : Admin logs out
+}
+
+AdminModeration --> [*] : Admin session ends
+@enduml
