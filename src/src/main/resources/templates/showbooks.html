@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Book List - BookX</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .header {
+            font-size: 30px;
+            font-weight: bold;
+            color: #007BFF;
+            margin-bottom: 20px;
+        }
+
+        .book-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .book-card {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 300px;
+            position: relative;
+        }
+
+        .book-card h3 {
+            margin: 0;
+            color: #007BFF;
+        }
+
+        .book-card p {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .icon {
+            margin-right: 5px;
+        }
+
+        .bookx-logo {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        .bookx-logo .x {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+<div class="header">Book List</div>
+
+<div class="book-list">
+    <div th:each="book : ${userBooks}" class="book-card">
+        <h3 th:text="${book.title}">Book Title</h3>
+        <p><i class="fas fa-user icon"></i>Author: <span th:text="${book.author}">Author</span></p>
+        <p><i class="fas fa-book icon"></i>Genre: <span th:text="${book.genre}">Genre</span></p>
+        <p><i class="fas fa-info-circle icon"></i>Condition: <span th:text="${book.condition}">Condition</span></p>
+        <div class="bookx-logo">Book<span class="x">X</span></div>
+    </div>
+</div>
+</body>
+</html>

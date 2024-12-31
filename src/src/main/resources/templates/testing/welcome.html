@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome - BookX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f4;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .logo {
+        font-size: 30px;
+        font-weight: bold;
+        color: #007BFF;
+    }
+
+    .book-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .book-card {
+        background-color: #ffffff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        width: 200px;
+        text-align: center;
+    }
+
+    .book-card h3 {
+        margin: 0;
+        color: #007BFF;
+    }
+
+    .book-card p {
+        margin: 5px 0;
+        color: #333;
+    }
+
+    .button {
+        background-color: #28a745;
+        color: white;
+        padding: 10px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .button:hover {
+        background-color: #218838;
+    }
+
+    .icon {
+        margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">BookX</div>
+  <a href="exchange.html" class="button"><i class="fas fa-exchange-alt icon"></i>Initiate Exchange</a>
+</div>
+
+<div class="book-list">
+  <div class="book-card">
+    <h3>Book Title 1</h3>
+    <p><i class="fas fa-user icon"></i>Author 1</p>
+    <button class="button"><i class="fas fa-exchange-alt icon"></i>Initiate Exchange</button>
+  </div>
+  <div class="book-card">
+    <h3>Book Title 2</h3>
+    <p><i class="fas fa-user icon"></i>Author 2</p>
+    <button class="button"><i class="fas fa-exchange-alt icon"></i>Initiate Exchange</button>
+  </div>
+  <div class="book-card">
+    <h3>Book Title 3</h3>
+    <p><i class="fas fa-user icon"></i>Author 3</p>
+    <button class="button"><i class="fas fa-exchange-alt icon"></i>Initiate Exchange</button>
+  </div>
+  <div class="book-card">
+    <h3>Book Title 4</h3>
+    <p><i class="fas fa-user icon"></i>Author 4</p>
+    <button class="button"><i class="fas fa-exchange-alt icon"></i>Initiate Exchange</button>
+  </div>
+  <!-- Add more book cards as needed -->
+</div>
+</body>
+</html>

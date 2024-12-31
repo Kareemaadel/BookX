@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Thank You - BookX</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f4f4f4;
+    }
+
+    .message {
+        text-align: center;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .message h1 {
+        color: #007BFF;
+        margin-bottom: 10px;
+    }
+
+    .message p {
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .message a {
+        text-decoration: none;
+        color: #ffffff;
+        background-color: #28a745;
+        padding: 10px 20px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+    }
+
+    .message a:hover {
+        background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+<div class="message">
+  <h1 th:text="'Thank You!'">Thank You!</h1>
+  <p th:text="'Thank you for your report with BookX. Our admins will handle it promptly.'">
+    Thank you for your report with BookX. Our admins will handle it promptly.
+  </p>
+  <a href="#" id="backLink" th:text="'Go Back'">Go Back</a>
+</div>
+
+<script>
+  // Redirect back to the previous page after a delay
+  setTimeout(function() {
+      window.history.back();
+  }, 5000); // 5000 milliseconds = 5 seconds
+
+  // Alternatively, you can use a link to go back immediately
+  document.getElementById('backLink').onclick = function(event) {
+      event.preventDefault();
+      window.history.back();
+  }
+</script>
+</body>
+</html>
