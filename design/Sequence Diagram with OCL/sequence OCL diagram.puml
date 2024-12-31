@@ -1,0 +1,58 @@
+@startuml
+
+actor User
+participant UserManager
+participant DatabaseManager
+participant User
+participant Book
+participant Exchange
+participant Report
+participant Admin
+
+' User registers
+User -> UserManager : register(name, email, password, contactNumber, address)
+note right of UserManager : <<precondition>>\nname != "" \nand email != "" \n and password.size() >= 8\n and contactNumber.size() >= 10
+note right of UserManager : <<OCL>>\nUser.allInstances()->exists(u | u.email = email) \n Checks if email already exists in the system
+note right of UserManager : <<postcondition>>\nUser instance created\nand added to the system
+UserManager -> DatabaseManager : connect()
+DatabaseManager -> DatabaseManager : check if email exists (email)
+note right of DatabaseManager : <<OCL>>\nUser.allInstances()->exists(u | u.email = email) \nIf email exists, return error
+DatabaseManager -> DatabaseManager : save user details (name, email, password, contactNumber, address)
+note right of DatabaseManager : <<postcondition>>\nUser added to the database with unique ID
+UserManager -> User : create new User instance (id, name, email, contactNumber)
+User -> User : confirm registration (id, name, email)
+note right of User : <<postcondition>>\nUser instance saved and added to the database
+
+' User creates a book
+User -> User : createBook(title, author, genre, condition)
+note right of User : <<precondition>>\ntitle != "" \nand author != "" \n and genre != "" \n and condition != ""
+note right of User : <<OCL>>\nBook.allInstances()->exists(b | b.title = title \nand b.author = author) \n Checks if a similar book exists
+User -> Book : create new Book instance (title, author, genre, condition)
+note right of Book : <<postcondition>>\nNew Book instance created\nand added to user's listing
+Book -> DatabaseManager : save book details to database (title, author, genre, condition)
+note right of DatabaseManager : <<postcondition>>\nBook added to the database with status "available"
+Book -> User : book successfully added to the user's listing
+note right of User : <<postcondition>>\nUser can now see the newly added book in their collection
+
+' User initiates an exchange
+User -> User : initiateExchange(bookOffered, bookRequested)
+note right of User : <<precondition>>\nbookRequested.status = "available"\n and bookOffered.status = "available"\n and bookOffered.owner <> bookRequested.owner
+note right of User : <<OCL>>\nExchange.allInstances()->exists(e | e.bookOffered = bookOffered \nand e.bookRequested = bookRequested \nand e.status = "pending")\n Checks if the exchange exists in pending status
+User -> Book : check status of bookRequested and bookOffered
+Book -> Exchange : create new Exchange instance (bookOffered, bookRequested)
+note right of Exchange : <<precondition>>\nExchange status = "pending" \nInitial status for an exchange
+Exchange -> DatabaseManager : save exchange details to database (bookOffered, bookRequested, participants)
+note right of DatabaseManager : <<postcondition>>\nExchange created and status saved as "pending"
+Exchange -> User : exchange successfully initiated (status = "pending")
+note right of User : <<postcondition>>\nUser receives confirmation of the exchange initiation
+
+' Admin resolves a report
+Admin -> Admin : manageReport(report)
+note right of Admin : <<precondition>>\nreport.status = "pending" \nThe report should be in pending status before resolution
+Admin -> Report : resolveReport(report)
+note right of Report : <<postcondition>>\nReport status updated to "resolved"
+Report -> DatabaseManager : update report status to "resolved"
+note right of DatabaseManager : <<postcondition>>\nReport status in database is updated to "resolved"
+Admin -> Admin : report successfully resolved
+
+@enduml

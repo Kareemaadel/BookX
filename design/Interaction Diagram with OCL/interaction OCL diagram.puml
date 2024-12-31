@@ -1,0 +1,142 @@
+@startuml
+
+actor User as U
+actor Admin as A
+entity UserManager as UM
+entity System as Sys
+entity BookManager as BM
+entity ExchangeManager as EM
+entity FeedbackManager as FM
+entity ReportManager as RM
+
+== User Registration ==
+U -> UM : register(name, email, password, contactNumber, address)
+note right of UM
+<<precondition>>
+- name, email, password, contactNumber, and address are valid
+- email must not exist in the system
+<<postcondition>>
+- User instance created and saved in the database
+end note
+UM -> Sys : checkEmailExists(email)
+alt If email does not exist
+    Sys --> UM : email is unique
+    UM -> Sys : save(User)
+    Sys --> UM : User saved
+    UM --> U : Registration successful
+else Email already exists
+    Sys --> UM : email already exists
+    UM --> U : Error: Email already registered
+end
+
+== User Login ==
+U -> UM : login(email, password)
+note right of UM
+<<precondition>>
+- email and password are not empty
+<<postcondition>>
+- Valid user session is initiated
+end note
+UM -> Sys : fetchUser(email, password)
+alt If valid credentials
+    Sys --> UM : User found
+    UM --> U : Login successful
+else Invalid credentials
+    Sys --> UM : User not found
+    UM --> U : Error: Invalid email or password
+end
+
+== Create a Book ==
+U -> BM : createBook(title, author, genre, condition)
+note right of BM
+<<precondition>>
+- title, author, genre, and condition are valid
+<<postcondition>>
+- Book instance is created and saved with status "available"
+end note
+BM -> Sys : save(Book)
+Sys --> BM : Book saved
+BM --> U : Book created successfully
+
+== Initiate Exchange ==
+U -> EM : createExchange(bookOffered, bookRequested)
+note right of EM
+<<precondition>>
+- bookOffered and bookRequested are available
+- bookOffered.owner = current user
+- bookRequested.owner != current user
+<<postcondition>>
+- Exchange created with status "pending"
+end note
+EM -> Sys : save(Exchange)
+Sys --> EM : Exchange saved
+EM --> U : Exchange initiated successfully
+
+alt If bookRequested is unavailable
+    EM --> U : Error: Requested book is not available
+end
+
+== Provide Feedback ==
+U -> FM : provideFeedback(exchange, rating, comment)
+note right of FM
+<<precondition>>
+- exchange.status = "completed"
+- rating is between 1 and 5
+<<postcondition>>
+- Feedback instance created and linked to the exchange
+end note
+FM -> Sys : save(Feedback)
+Sys --> FM : Feedback saved
+FM --> U : Feedback submitted successfully
+
+alt If exchange is not completed
+    FM --> U : Error: Cannot provide feedback for incomplete exchange
+end
+
+== Resolve Feedback ==
+A -> FM : resolveFeedback(feedback)
+note right of FM
+<<precondition>>
+- feedback.status = "pending"
+<<postcondition>>
+- feedback.status is updated to "resolved"
+end note
+FM -> Sys : updateFeedback(Feedback)
+Sys --> FM : Feedback resolved
+FM --> A : Feedback resolved successfully
+
+alt If feedback is already resolved
+    FM --> A : Error: Feedback is already resolved
+end
+
+== Submit Report ==
+U -> RM : reportIssue(book, reason)
+note right of RM
+<<precondition>>
+- book exists in the system
+- reason is not empty
+<<postcondition>>
+- Report instance created and linked to the book
+end note
+RM -> Sys : save(Report)
+Sys --> RM : Report saved
+RM --> U : Report submitted successfully
+
+== Delete Book ==
+A -> BM : deleteBook(book)
+note right of BM
+<<precondition>>
+- book exists in the system
+<<postcondition>>
+- Book instance is removed from the database
+end note
+BM -> Sys : delete(Book)
+alt If book exists
+    Sys --> BM : Book deleted
+    BM --> A : Book deleted successfully
+else Book does not exist
+    Sys --> BM : Book not found
+    BM --> A : Error: Book not found
+end
+
+@enduml
