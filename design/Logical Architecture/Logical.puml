@@ -1,0 +1,87 @@
+@startuml
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+
+package "Desktop Application" {
+    [User Interface (UI)]
+    [User Controller]
+    [Admin Controller]
+    [Book Controller]
+    [Exchange Controller]
+    [Search Controller]
+}
+
+package "Business Logic Layer" {
+    [User Service]
+    [Admin Service]
+    [Book Service]
+    [Exchange Service]
+    [Search Service]
+}
+
+package "Data Access Layer" {
+    [User DAO]
+    [Book DAO]
+    [Exchange DAO]
+    [Report DAO]
+    [Feedback DAO]
+}
+
+package "Database" {
+    [Users Table]
+    [Books Table]
+    [Exchanges Table]
+    [Reports Table]
+    [Feedback Table]
+}
+
+package "Utility Components" {
+    [Authentication Manager]
+    [Encryption Manager]
+    [Validation Manager]
+}
+
+package "External APIs" {
+    [Email Service]
+}
+
+' Connections between UI and Controllers
+[User Interface (UI)] --> [User Controller]
+[User Interface (UI)] --> [Admin Controller]
+[User Interface (UI)] --> [Book Controller]
+[User Interface (UI)] --> [Exchange Controller]
+[User Interface (UI)] --> [Search Controller]
+
+' Connections between Controllers and Business Logic Layer
+[User Controller] --> [User Service]
+[Admin Controller] --> [Admin Service]
+[Book Controller] --> [Book Service]
+[Exchange Controller] --> [Exchange Service]
+[Search Controller] --> [Search Service]
+
+' Connections between Business Logic Layer and Data Access Layer
+[User Service] --> [User DAO]
+[Admin Service] --> [User DAO]
+[Book Service] --> [Book DAO]
+[Exchange Service] --> [Exchange DAO]
+[Exchange Service] --> [Report DAO]
+[Search Service] --> [Book DAO]
+
+' Connections between Data Access Layer and Database
+[User DAO] --> [Users Table]
+[Book DAO] --> [Books Table]
+[Exchange DAO] --> [Exchanges Table]
+[Report DAO] --> [Reports Table]
+[Feedback DAO] --> [Feedback Table]
+
+' Connections between Business Logic Layer and Utility Components
+[User Service] --> [Authentication Manager]
+[User Service] --> [Encryption Manager]
+[Admin Service] --> [Validation Manager]
+
+' External APIs interactions
+[User Service] --> [Email Service]
+
+
+@enduml
