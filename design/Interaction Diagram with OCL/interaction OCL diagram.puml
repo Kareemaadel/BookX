@@ -11,6 +11,7 @@ entity ReportManager as RM
 
 == User Registration ==
 U -> UM : register(name, email, password, contactNumber, address)
+activate UM
 note right of UM
 <<precondition>>
 - name, email, password, contactNumber, and address are valid
@@ -20,17 +21,25 @@ note right of UM
 end note
 UM -> Sys : checkEmailExists(email)
 alt If email does not exist
+    activate Sys
     Sys --> UM : email is unique
+    deactivate Sys
     UM -> Sys : save(User)
+    activate Sys
     Sys --> UM : User saved
+    deactivate Sys
     UM --> U : Registration successful
 else Email already exists
+    activate Sys
     Sys --> UM : email already exists
+    deactivate Sys
     UM --> U : Error: Email already registered
 end
 
+deactivate UM
 == User Login ==
 U -> UM : login(email, password)
+activate UM
 note right of UM
 <<precondition>>
 - email and password are not empty
@@ -39,15 +48,21 @@ note right of UM
 end note
 UM -> Sys : fetchUser(email, password)
 alt If valid credentials
+    activate Sys
     Sys --> UM : User found
+    deactivate Sys
     UM --> U : Login successful
 else Invalid credentials
+    activate Sys
     Sys --> UM : User not found
+    deactivate Sys
     UM --> U : Error: Invalid email or password
 end
+deactivate UM
 
 == Create a Book ==
 U -> BM : createBook(title, author, genre, condition)
+activate BM
 note right of BM
 <<precondition>>
 - title, author, genre, and condition are valid
@@ -55,11 +70,15 @@ note right of BM
 - Book instance is created and saved with status "available"
 end note
 BM -> Sys : save(Book)
+activate Sys
 Sys --> BM : Book saved
+deactivate Sys
 BM --> U : Book created successfully
+deactivate BM
 
 == Initiate Exchange ==
 U -> EM : createExchange(bookOffered, bookRequested)
+activate EM
 note right of EM
 <<precondition>>
 - bookOffered and bookRequested are available
@@ -69,15 +88,19 @@ note right of EM
 - Exchange created with status "pending"
 end note
 EM -> Sys : save(Exchange)
+activate Sys
 Sys --> EM : Exchange saved
+deactivate Sys
 EM --> U : Exchange initiated successfully
 
+deactivate EM
 alt If bookRequested is unavailable
     EM --> U : Error: Requested book is not available
 end
 
 == Provide Feedback ==
 U -> FM : provideFeedback(exchange, rating, comment)
+activate FM
 note right of FM
 <<precondition>>
 - exchange.status = "completed"
@@ -86,8 +109,11 @@ note right of FM
 - Feedback instance created and linked to the exchange
 end note
 FM -> Sys : save(Feedback)
+activate Sys
 Sys --> FM : Feedback saved
+deactivate Sys
 FM --> U : Feedback submitted successfully
+deactivate FM
 
 alt If exchange is not completed
     FM --> U : Error: Cannot provide feedback for incomplete exchange
@@ -95,6 +121,7 @@ end
 
 == Resolve Feedback ==
 A -> FM : resolveFeedback(feedback)
+activate FM
 note right of FM
 <<precondition>>
 - feedback.status = "pending"
@@ -102,8 +129,11 @@ note right of FM
 - feedback.status is updated to "resolved"
 end note
 FM -> Sys : updateFeedback(Feedback)
+activate Sys
 Sys --> FM : Feedback resolved
+deactivate Sys
 FM --> A : Feedback resolved successfully
+deactivate FM
 
 alt If feedback is already resolved
     FM --> A : Error: Feedback is already resolved
@@ -111,6 +141,7 @@ end
 
 == Submit Report ==
 U -> RM : reportIssue(book, reason)
+activate RM
 note right of RM
 <<precondition>>
 - book exists in the system
@@ -119,11 +150,15 @@ note right of RM
 - Report instance created and linked to the book
 end note
 RM -> Sys : save(Report)
+activate Sys
 Sys --> RM : Report saved
+deactivate Sys
 RM --> U : Report submitted successfully
+deactivate RM
 
 == Delete Book ==
 A -> BM : deleteBook(book)
+activate BM
 note right of BM
 <<precondition>>
 - book exists in the system
@@ -131,12 +166,16 @@ note right of BM
 - Book instance is removed from the database
 end note
 BM -> Sys : delete(Book)
+activate Sys
 alt If book exists
     Sys --> BM : Book deleted
+    deactivate Sys
     BM --> A : Book deleted successfully
-else Book does not exist
+alt Book does not exist
     Sys --> BM : Book not found
+    deactivate Sys
     BM --> A : Error: Book not found
 end
+deactivate BM
 
 @enduml

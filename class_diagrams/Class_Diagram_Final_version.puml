@@ -43,12 +43,6 @@ feedback.status is "pending"
 feedback.status is updated to "resolved"
 end note
 
-' --- DatabaseManager Class ---
-class DatabaseManager {
-    - instance : DatabaseManager
-    + connect() : void ' Singleton method for database connection
-    + getInstance() : DatabaseManager ' Singleton instance method
-}
 
 ' --- UserManager Class ---
 class UserManager {

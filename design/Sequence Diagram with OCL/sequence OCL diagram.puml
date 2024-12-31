@@ -1,58 +1,138 @@
 @startuml
+actor User as u
+participant UserManager as um
+participant User as user
+participant Book as b
+participant Exchange as e
+participant Feedback as f
+participant Report as r
 
-actor User
-participant UserManager
-participant DatabaseManager
-participant User
-participant Book
-participant Exchange
-participant Report
-participant Admin
 
-' User registers
-User -> UserManager : register(name, email, password, contactNumber, address)
-note right of UserManager : <<precondition>>\nname != "" \nand email != "" \n and password.size() >= 8\n and contactNumber.size() >= 10
-note right of UserManager : <<OCL>>\nUser.allInstances()->exists(u | u.email = email) \n Checks if email already exists in the system
-note right of UserManager : <<postcondition>>\nUser instance created\nand added to the system
-UserManager -> DatabaseManager : connect()
-DatabaseManager -> DatabaseManager : check if email exists (email)
-note right of DatabaseManager : <<OCL>>\nUser.allInstances()->exists(u | u.email = email) \nIf email exists, return error
-DatabaseManager -> DatabaseManager : save user details (name, email, password, contactNumber, address)
-note right of DatabaseManager : <<postcondition>>\nUser added to the database with unique ID
-UserManager -> User : create new User instance (id, name, email, contactNumber)
-User -> User : confirm registration (id, name, email)
-note right of User : <<postcondition>>\nUser instance saved and added to the database
+' --- User Registration ---
+u -> um : getInstance()
+activate um
+um --> um : Return instance of UserManager
+deactivate um
+u -> um : register(name, email, password, contactNumber, address)
+activate um
+note right
+<<OCL>>
+context UserManager::register(name: String, email: String, password: String, contactNumber: String, address: String)
+pre: name <> "" and email.matches("^[\\w-\\.+]*[\\w-\\.]\\@[\\w]+\\.[\\w]+(\\.[\\w]+)*$") and password.size() >= 8 and contactNumber.matches("^[0-9]+$") and address <> ""
+post: User.allInstances()->exists(u | u.name = name and u.email = email and u.contactNumber = contactNumber and u.address = address)
+end note
+um --> user : Return new User instance
+deactivate um
 
-' User creates a book
-User -> User : createBook(title, author, genre, condition)
-note right of User : <<precondition>>\ntitle != "" \nand author != "" \n and genre != "" \n and condition != ""
-note right of User : <<OCL>>\nBook.allInstances()->exists(b | b.title = title \nand b.author = author) \n Checks if a similar book exists
-User -> Book : create new Book instance (title, author, genre, condition)
-note right of Book : <<postcondition>>\nNew Book instance created\nand added to user's listing
-Book -> DatabaseManager : save book details to database (title, author, genre, condition)
-note right of DatabaseManager : <<postcondition>>\nBook added to the database with status "available"
-Book -> User : book successfully added to the user's listing
-note right of User : <<postcondition>>\nUser can now see the newly added book in their collection
+' --- Listing a Book ---
+u -> user : createBook(title, author, genre, condition)
+activate user
+note right
+<<OCL>>
+context User::createBook(title: String, author: String, genre: String, condition: String)
+pre: title <> "" and author <> "" and genre <> "" and condition in ["new", "used"]
+post: Book.allInstances()->exists(b | b.title = title and b.author = author and b.genre = genre and b.condition = condition and b.status = "available")
+end note
+user -> b : Create Book instance
+activate b
+b --> user : Return Book instance
+deactivate b
+b -> b : listBook()
+activate b
+b --> u : Book listed successfully
+deactivate b
+deactivate user
 
-' User initiates an exchange
-User -> User : initiateExchange(bookOffered, bookRequested)
-note right of User : <<precondition>>\nbookRequested.status = "available"\n and bookOffered.status = "available"\n and bookOffered.owner <> bookRequested.owner
-note right of User : <<OCL>>\nExchange.allInstances()->exists(e | e.bookOffered = bookOffered \nand e.bookRequested = bookRequested \nand e.status = "pending")\n Checks if the exchange exists in pending status
-User -> Book : check status of bookRequested and bookOffered
-Book -> Exchange : create new Exchange instance (bookOffered, bookRequested)
-note right of Exchange : <<precondition>>\nExchange status = "pending" \nInitial status for an exchange
-Exchange -> DatabaseManager : save exchange details to database (bookOffered, bookRequested, participants)
-note right of DatabaseManager : <<postcondition>>\nExchange created and status saved as "pending"
-Exchange -> User : exchange successfully initiated (status = "pending")
-note right of User : <<postcondition>>\nUser receives confirmation of the exchange initiation
+' --- Initiating an Exchange ---
+u -> user : createExchange(bookOffered, bookRequested)
+activate user
+note right
+<<OCL>>
+context User::createExchange(bookOffered: Book, bookRequested: Book)
+pre: bookOffered.status = "available" and bookRequested.status = "available" and bookOffered <> bookRequested
+post: Exchange.allInstances()->exists(e | e.bookOffered = bookOffered and e.bookRequested = bookRequested and e.status = "pending")
+end note
+user -> e : Create Exchange instance
+activate e
+b -> e : Associate offered and requested books
+user -> e : initiateExchange()
+note right
+<<OCL>>
+context Exchange::initiateExchange()
+pre: self.status = "pending"
+post: self.participants->size() = 2 and self.status = "pending"
+end note
+e --> u : Exchange initiated
+deactivate e
+deactivate user
 
-' Admin resolves a report
-Admin -> Admin : manageReport(report)
-note right of Admin : <<precondition>>\nreport.status = "pending" \nThe report should be in pending status before resolution
-Admin -> Report : resolveReport(report)
-note right of Report : <<postcondition>>\nReport status updated to "resolved"
-Report -> DatabaseManager : update report status to "resolved"
-note right of DatabaseManager : <<postcondition>>\nReport status in database is updated to "resolved"
-Admin -> Admin : report successfully resolved
+' --- Providing Feedback ---
+u -> user : provideFeedback(exchange, rating, comment)
+activate user
+note right
+<<OCL>>
+context User::provideFeedback(exchange: Exchange, rating: int, comment: String)
+pre: exchange.status = "completed" and rating >= 1 and rating <= 5 and comment <> ""
+post: Feedback.allInstances()->exists(f | f.exchange = exchange and f.rating = rating and f.comment = comment)
+end note
+user -> f : Create Feedback instance
+activate f
+f -> e : Associate feedback with exchange
+f -> f : provideFeedback()
+f --> u : Feedback provided successfully
+deactivate f
+deactivate user
+
+' --- Reporting an Issue ---
+u -> user : reportIssue(book, reason)
+activate user
+note right
+<<OCL>>
+context User::reportIssue(book: Book, reason: String)
+pre: book.status = "available" and reason <> ""
+post: Report.allInstances()->exists(r | r.book = book and r.reason = reason and r.status = "pending")
+end note
+user -> r : Create Report instance
+activate r
+b -> r : Associate book with report
+u -> r : submitReport()
+note right
+<<OCL>>
+context Report::submitReport()
+pre: self.status = "pending"
+post: self.details <> "" and self.status = "submitted"
+end note
+r --> u : Report submitted successfully
+deactivate r
+deactivate user
+
+' --- Viewing Exchange History ---
+u -> user : viewExchangeHistory()
+activate user
+note right
+<<OCL>>
+context User::viewExchangeHistory()
+pre: self.exchanges->notEmpty()
+post: result = self.exchanges->select(e | e.participants->includes(self))
+end note
+user -> e : Retrieve exchanges involving user
+activate e
+e --> u : Return exchange history
+deactivate e
+deactivate user
+
+' --- Browsing Books ---
+u -> user : browseBooks()
+activate user
+note right
+<<OCL>>
+context User::browseBooks()
+post: result = Book.allInstances()->select(b | b.status = "available")
+end note
+user -> b : Retrieve available books
+activate b
+b --> u : Return list of books
+deactivate b
+deactivate user
 
 @enduml
