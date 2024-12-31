@@ -1,0 +1,237 @@
+@startuml
+
+start
+
+:User initiates action;
+
+if (Action Type?) then (Register)
+    :User provides the following details:\n
+    - Name (String, non-empty)\n
+    - Email (String, must be a valid email address)\n
+    - Password (String, at least 8 characters)\n
+    - Contact Number (String, 10 or more digits)\n
+    - Address (String, non-empty);
+
+    note right
+    <<OCL Preconditions>>
+    name.size() > 0
+    and password.size() >= 8
+    and contactNumber.size() >= 10
+    and address.size() > 0
+    and email.size() > 0 and email.contains("@") and email.contains(".");
+    end note
+
+    if (Valid Details?) then (Yes)
+        :Check email uniqueness in the system;
+
+        note right
+        <<OCL Preconditions>>
+        User.allInstances()->select(u | u.email = providedEmail)->isEmpty();
+        end note
+
+        if (Email Unique?) then (Yes)
+            :Create new User instance;\n
+            Assign auto-generated User ID;
+            :Persist User into the database;
+
+            note right
+            <<OCL Postconditions>>
+            User.allInstances()->exists(u | u.email = providedEmail and u.name = providedName and u.contactNumber = providedContactNumber);
+            end note
+
+            :Registration Successful;
+        else (No)
+            :Notify User: Email already registered;
+            ->stop;
+        endif
+    else (No)
+        :Notify User: Invalid details;\n
+        Provide detailed error feedback;
+        ->stop;
+    endif
+else (Login)
+    :User provides email and password;
+
+    note right
+    <<OCL Preconditions>>
+    email.size() > 0 and email.contains("@") and email.contains(".")
+    and password.size() >= 8;
+    end note
+
+    if (Valid Credentials?) then (Yes)
+        :Authenticate User using database;\n
+        Initiate session for User;
+
+        note right
+        <<OCL Postconditions>>
+        User.allInstances()->exists(u | u.email = providedEmail and u.password = providedPassword);
+        end note
+
+        :Login Successful;
+    else (No)
+        :Notify User: Invalid email or password;
+        ->stop;
+    endif
+endif
+
+if (Action Type? = Create Book) then (Create Book)
+    :User provides the following book details:\n
+    - Title (String, non-empty)\n
+    - Author (String, non-empty)\n
+    - Genre (String, non-empty)\n
+    - Condition (String, non-empty);
+
+    note right
+    <<OCL Preconditions>>
+    title.size() > 0
+    and author.size() > 0
+    and genre.size() > 0
+    and condition.size() > 0
+    and (genre = "Fiction" or genre = "Non-fiction" or genre = "Fantasy" or genre = "Science Fiction" or genre = "Biography" or genre = "History")
+    and (condition = "New" or condition = "Used" or condition = "Worn" or condition = "Damaged");
+    end note
+
+    if (Valid Book Details?) then (Yes)
+        :Create Book instance with the following:\n
+        - Auto-generated ID\n
+        - "Available" status;
+
+        note right
+        <<OCL Postconditions>>
+        Book.allInstances()->exists(b | b.title = providedTitle and b.author = providedAuthor and b.genre = providedGenre and b.condition = providedCondition and b.status = "available");
+        end note
+
+        :Link Book to the current User;
+        :Persist Book into the database;
+        :Book successfully listed;
+    else (No)
+        :Notify User: Invalid book details;\n
+        Provide detailed feedback;
+        ->stop;
+    endif
+endif
+
+if (Action Type? = Initiate Exchange) then (Initiate Exchange)
+    :User provides bookOffered and bookRequested;
+
+    note right
+    <<OCL Preconditions>>
+    bookOffered.status = "available"
+    and bookRequested.status = "available"
+    and bookOffered.owner <> bookRequested.owner
+    and bookOffered.genre = bookRequested.genre;
+    end note
+
+    if (Valid Exchange Conditions?) then (Yes)
+        :Create new Exchange instance:\n
+        - Auto-generated ID\n
+        - Status set to "Pending";
+
+        note right
+        <<OCL Postconditions>>
+        Exchange.allInstances()->exists(e | e.status = "pending" and e.bookOffered = bookOffered and e.bookRequested = bookRequested);
+        end note
+
+        :Link books and participants to the Exchange;
+        :Persist Exchange into the database;
+        :Exchange initiated successfully;
+    else (No)
+        :Notify User: Exchange conditions not met;\n
+        Provide error reasons (e.g., same owner, mismatched genres);
+        ->stop;
+    endif
+endif
+
+if (Action Type? = Provide Feedback) then (Provide Feedback)
+    :User selects Exchange and provides:\n
+    - Rating (Integer, 1 to 5)\n
+    - Comment (String, optional);
+
+    note right
+    <<OCL Preconditions>>
+    exchange.status = "completed"
+    and rating >= 1 and rating <= 5
+    and (comment.size() = 0 or comment.size() >= 10);
+    end note
+
+    if (Exchange Completed and Valid Rating?) then (Yes)
+        :Create Feedback instance with:\n
+        - Auto-generated ID\n
+        - Provided rating and comment\n
+        - Status set to "Pending";
+
+        note right
+        <<OCL Postconditions>>
+        Feedback.allInstances()->exists(f | f.rating = providedRating and f.comment = providedComment and f.status = "pending" and f.exchange = exchange);
+        end note
+
+        :Link Feedback to the Exchange;
+        :Persist Feedback into the database;
+        :Feedback successfully submitted;
+    else (No)
+        :Notify User: Feedback conditions not met;\n
+        Provide error feedback;
+        ->stop;
+    endif
+endif
+
+if (Action Type? = Submit Report) then (Submit Report)
+    :User selects a Book and provides:\n
+    - Reason (String, non-empty)\n
+    - Additional details (optional);
+
+    note right
+    <<OCL Preconditions>>
+    book <> null
+    and reason.size() > 0
+    and (additionalDetails.size() = 0 or additionalDetails.size() >= 10);
+    end note
+
+    if (Valid Report Details?) then (Yes)
+        :Create Report instance with:\n
+        - Auto-generated ID\n
+        - Status set to "Pending";
+
+        note right
+        <<OCL Postconditions>>
+        Report.allInstances()->exists(r | r.status = "pending" and r.reason = providedReason and r.book = book);
+        end note
+
+        :Link Report to the Book;
+        :Persist Report into the database;
+        :Report successfully submitted;
+    else (No)
+        :Notify User: Invalid report details;\n
+        Provide error feedback;
+        ->stop;
+    endif
+endif
+
+if (Action Type? = Admin Actions) then (Admin Actions)
+    :Admin selects an action (e.g., Delete Book, Resolve Feedback);
+
+    note right
+    <<OCL Preconditions>>
+    Each action must meet specific preconditions (e.g., \n
+    Feedback.status = "pending" for resolving feedback);
+    end note
+
+    if (Valid Admin Action Conditions?) then (Yes)
+        :Perform selected action;\n
+        Update relevant database entries;
+
+        note right
+        <<OCL Postconditions>>
+        Action.allInstances()->exists(a | a.status = "completed" and a.admin = currentAdmin);
+        end note
+
+        :Action completed successfully;
+    else (No)
+        :Notify Admin: Conditions not met for action;
+        ->stop;
+    endif
+endif
+
+stop
+
+@enduml
