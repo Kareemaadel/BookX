@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Welcome - BookX</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .sidebar {
+            background-color: #007BFF;
+            width: 300px;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100vh;
+        }
+
+        .sidebar .brand {
+            font-weight: bold;
+            font-size: 30px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar .brand .book {
+            color: white;
+        }
+
+        .sidebar .brand .x {
+            color: green;
+        }
+
+        .sidebar .user-info {
+            margin-bottom: 30px;
+        }
+
+        .sidebar .user-info h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar .user-info p {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .sidebar .button {
+            text-decoration: none;
+            color: white;
+            background-color: #28a745;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .sidebar .button .icon {
+            background-color: #ffffff;
+            color: #007BFF;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            font-size: 12px;
+        }
+
+        .sidebar .button:hover {
+            background-color: #218838;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            text-decoration: none;
+            color: white;
+            background-color: #0056b3;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .sidebar .logout:hover {
+            background-color: #003f82;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background-color: #ffffff;
+            overflow-y: auto;
+        }
+
+        .main-content h3 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            width: 80%;
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px 0 0 4px;
+            font-size: 16px;
+        }
+
+        .search-bar button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-bar button:hover {
+            background-color: #218838;
+        }
+
+        .book-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .book-card {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 300px;
+            position: relative;
+        }
+
+        .book-card h3 {
+            margin: 0;
+            color: #007BFF;
+        }
+
+        .book-card p {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .bookx-logo {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        .bookx-logo .x {
+            color: green;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background-color: #c82333;
+            transform: scale(1.1);
+        }
+
+        .modal-content input,
+        .modal-content select {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content input:hover,
+        .modal-content select:hover {
+            border-color: #007BFF;
+        }
+
+        .modal-content input:focus,
+        .modal-content select:focus {
+            outline: none;
+            border-color: #007BFF;
+            box-shadow: 0 0 5px rgba(0,123,255,0.3);
+        }
+
+        .modal-content button[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content button[type="submit"]:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="brand">
+        <span class="book">Book</span><span class="x">X</span>
+    </div>
+    <div class="user-info">
+        <h3>Hello, <span th:text="${user.name}">User</span>!</h3>
+        <p>Email: <span th:text="${user.email}">user@example.com</span></p>
+    </div>
+    <div class="button" id="openBookModal">
+        <span class="icon">+</span> Add a Book
+    </div>
+    <div class="button" id="openReportModal">
+        <span class="icon">!</span> Report a Book
+    </div>
+    <div class="button" id="openExchangeModal">
+        <span class="icon">:)</span> Initiate an Exchange
+    </div>
+    <form th:action="@{/user/showBooks}" method="get">
+        <button type="submit" class="button">
+            <span class="icon">&#128214;</span> Show Books
+        </button>
+    </form>
+    <a class="logout" href="#">Logout</a>
+</div>
+<div class="main-content">
+    <h3>Welcome to BookX. Your one-stop platform for book exchanges.</h3>
+    <div class="search-bar">
+        <form th:action="@{/user/searchBooks}" method="get" style="display: flex; width: 100%;">
+            <input type="text" name="query" placeholder="Search for books or authors..." required>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    <div id="bookList" class="book-list">
+        <div th:each="book : ${searchres}" class="book-card">
+            <h3 th:text="${book.title}">Book Title</h3>
+            <p><i class="fas fa-user icon"></i>Author: <span th:text="${book.author}">Author</span></p>
+            <p><i class="fas fa-book icon"></i>Genre: <span th:text="${book.genre}">Genre</span></p>
+            <p><i class="fas fa-info-circle icon"></i>Condition: <span th:text="${book.condition}">Condition</span></p>
+            <div class="bookx-logo">Book<span class="x">X</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Add Book Form -->
+<div class="modal" id="bookModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>Add Book Details</h4>
+            <button class="close-btn" id="closeBookModal">&times;</button>
+        </div>
+        <form th:action="@{/user/addbook}" method="post" th:object="${Book}">
+            <input type="text" th:field="*{title}" placeholder="Title" required>
+            <input type="text" th:field="*{author}" placeholder="Author" required>
+            <input placeholder="Genre" required th:field="*{genre}" type="text">
+            <select th:field="*{condition}" required>
+                <option value="">Select Condition</option>
+                <option value="available">Available</option>
+                <option value="exchanged">Exchanged</option>
+            </select>
+            <button type="submit">Add Book</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Report Form -->
+<div class="modal" id="reportModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>Report a Book</h4>
+            <button class="close-btn" id="closeReportModal">&times;</button>
+        </div>
+        <form th:action="@{/user/addreport}" method="post" th:object="${Report}">
+            <input type="text" th:field="*{BookName}" placeholder="BookName" required>
+            <input type="text" th:field="*{reason}" placeholder="Reason" required>
+            <select th:field="*{status}" required>
+                <option value="">Select Status</option>
+                <option value="pending">Pending</option>
+                <option value="resolved">Resolved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+            <button type="submit">Submit Report</button>
+        </form>
+    </div>
+</div>
+<!-- Modal for Exchange Form -->
+<div class="modal" id="exchangeModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>Initiate an Exchange</h4>
+            <button class="close-btn" id="closeExchangeModal">&times;</button>
+        </div>
+        <form >
+            <input type="text" placeholder="User 1 ID" required>
+            <input type="text" placeholder="User 2 ID" required>
+            <input type="text" placeholder="Book 1 ID" required>
+            <input type="text" placeholder="Book 2 ID" required>
+            <button type="submit">Initiate Exchange</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Get modal and button elements
+ const bookModal = document.getElementById('bookModal');
+ const reportModal = document.getElementById('reportModal');
+ const exchangeModal = document.getElementById('exchangeModal');
+
+ const openBookModalBtn = document.getElementById('openBookModal');
+ const openReportModalBtn = document.getElementById('openReportModal');
+ const openExchangeModalBtn = document.getElementById('openExchangeModal');
+
+ const closeBookModalBtn = document.getElementById('closeBookModal');
+ const closeReportModalBtn = document.getElementById('closeReportModal');
+ const closeExchangeModalBtn = document.getElementById('closeExchangeModal');
+
+ // Open the book modal when the "Add a Book" button is clicked
+ openBookModalBtn.onclick = function() {
+     bookModal.style.display = 'flex';
+ }
+
+ // Open the report modal when the "Report a Book" button is clicked
+ openReportModalBtn.onclick = function() {
+     reportModal.style.display = 'flex';
+ }
+
+ // Open the exchange modal when the "Initiate an Exchange" button is clicked
+ openExchangeModalBtn.onclick = function() {
+     exchangeModal.style.display = 'flex';
+ }
+
+ // Close the book modal when the close button is clicked
+ closeBookModalBtn.onclick = function() {
+     bookModal.style.display = 'none';
+ }
+
+ // Close the report modal when the close button is clicked
+ closeReportModalBtn.onclick = function() {
+     reportModal.style.display = 'none';
+ }
+
+ // Close the exchange modal when the close button is clicked
+ closeExchangeModalBtn.onclick = function() {
+     exchangeModal.style.display = 'none';
+ }
+
+ // Close the modals when clicked outside of them
+ window.onclick = function(event) {
+     if (event.target === bookModal) {
+         bookModal.style.display = 'none';
+     }
+     if (event.target === reportModal) {
+         reportModal.style.display = 'none';
+     }
+     if (event.target === exchangeModal) {
+         exchangeModal.style.display = 'none';
+     }
+ }
+</script>
+
+</body>
+</html>

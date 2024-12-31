@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f9;
+        background-image: radial-gradient(circle, #c4c4c4 0.5px, transparent 0.5px), radial-gradient(circle, #c4c4c4 0.5px, #f4f4f9 0.5px);
+        background-size: 20px 20px;
+        background-position: 0, 0, 10px ;
+    }
+
+    .admin-container {
+        width: 80%;
+        max-width: 1200px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .logo {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .logo h1 {
+        font-size: 2em;
+        color: #333;
+    }
+
+    .logo span {
+        color: green;
+    }
+
+    .box-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .box {
+        flex: 1;
+        background-color: #e9ecef;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .box:hover {
+        background-color: #d4d9df;
+    }
+
+    .box h2 {
+        margin-bottom: 10px;
+        font-size: 1.5em;
+        color: #333;
+    }
+
+    .form-button {
+        background-color: transparent;
+        border: none;
+        font-size: 1.5em;
+        color: #333;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+
+    .form-button:hover {
+        color: #007bff;
+    }
+  </style>
+</head>
+<body>
+<div class="admin-container">
+  <div class="logo">
+    <h1>Book<span>X</span></h1>
+
+  <div class="box-container">
+    <form th:action="@{/Admin/reports}" method="get" class="box">
+      <h2>Handle Reports</h2>
+      <p>Manage and review user reports.</p>
+      <button type="submit" class="form-button">Go</button>
+    </form>
+    <form class="box">
+      <h2>Review Exchanges</h2>
+      <p>Oversee and approve exchanges.</p>
+      <button type="submit" class="form-button">Go</button>
+    </form>
+
+  </div>
+</div>
+</div>
+</body>
+</html>

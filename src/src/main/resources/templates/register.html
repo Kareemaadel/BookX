@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register - BookX</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            padding: 20px;
+            text-align: center;
+        }
+        .container h2 {
+            color: #333333;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        a {
+            display: block;
+            margin-top: 15px;
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Register</h2>
+    <form th:action="@{/user}" method="post" th:object="${User}">
+        <input type="text" name="name" th:field="*{name}" placeholder="Enter your name" required>
+        <input type="text" name="email" th:field="*{email}" placeholder="Enter your email" required>
+        <input type="text" name="password" th:field="*{password}" placeholder="Enter your password" required>
+        <input type="text" name="contactNumber"    th:field="*{contactNumber}" placeholder="Enter your contact number" required>
+        <input type="text" name="address"   th:field="*{address}" placeholder="Enter your address" required>
+        <button type="submit">Register</button>
+    </form>
+    <a th:href="@{/user/login}">Already have an account? Login here</a>
+</div>
+</body>
+</html>
